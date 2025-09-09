@@ -1,0 +1,54 @@
+career_path,required_skills
+Data Scientist,Python;Machine Learning;Data Analysis;SQL;Statistics;Pandas;NumPy;Visualization
+Machine Learning Engineer,Python;Deep Learning;TensorFlow;PyTorch;NLP;Docker;Model Deployment
+AI Researcher,Python;Deep Learning;Reinforcement Learning;NLP;Computer Vision;Research;Publications
+Java Backend Developer,Java;Spring;Spring Boot;Hibernate;MySQL;REST API;Microservices;Git
+Web Developer,HTML;CSS;JavaScript;React;Node.js;Express;MongoDB;Bootstrap
+Frontend Developer,React;HTML;CSS;JavaScript;TypeScript;UI/UX;Redux;Angular
+Backend Developer,Node.js;Express;MongoDB;API;PostgreSQL;Authentication;GraphQL;Docker
+Software Engineer,Python;Java;Git;Problem Solving;Algorithms;Data Structures;OOP
+Mobile App Developer,Java;Kotlin;Swift;Flutter;React Native;APIs;UI/UX;Firebase
+Full Stack Developer,React;Node.js;MongoDB;Express;TypeScript;Next.js;GraphQL;REST API
+Database Administrator,SQL;MySQL;MongoDB;PostgreSQL;Backup;Performance Tuning;Oracle
+Cloud Engineer,AWS;Azure;GCP;Kubernetes;Terraform;Docker;CI/CD;Networking
+DevOps Engineer,Docker;Kubernetes;CI/CD;Linux;AWS;Terraform;Jenkins;Automation
+Cybersecurity Analyst,Networking;Penetration Testing;Firewalls;IDS/IPS;Encryption;SIEM;Incident Response
+Blockchain Developer,Solidity;Ethereum;Smart Contracts;DeFi;Web3;Cryptography;Node.js
+Game Developer,Unity;C#;C++;Unreal Engine;3D Modeling;Animation;AI for Games
+UI/UX Designer,Figma;Adobe XD;Prototyping;Wireframing;User Research;Design Thinking;Accessibility
+Project Manager,Leadership;Communication;Teamwork;Planning;Agile;Scrum;Risk Management
+Business Analyst,Requirements Gathering;UML;SQL;Data Analysis;Excel;Stakeholder Management
+Product Manager,Market Research;Roadmapping;Agile;Scrum;Business Strategy;Wireframing;Leadership
+Sales Executive,Sales;Communication;Negotiation;CRM;Customer Relations;Target Achievement
+Marketing Manager,Marketing;SEO;Content Strategy;Advertising;Branding;Campaigns;Social Media
+Digital Marketing Specialist,SEO;SEM;Google Analytics;Facebook Ads;Email Marketing;Content Creation
+Teacher,Teaching;Lesson Planning;Curriculum Design;Classroom Management;Education;Mentorship
+Professor,Research;Teaching;Publishing;Mentoring;Curriculum Development;Academic Writing
+Accountant,Accounting;Bookkeeping;Finance;Taxation;Auditing;Budgeting;MS Excel
+Financial Analyst,Financial Modeling;Valuation;Excel;Forecasting;Risk Management;Investment Analysis
+Investment Banker,Finance;Valuation;Mergers;Acquisitions;Risk Management;Excel;Client Relations
+HR Specialist,Recruitment;Onboarding;Employee Relations;Payroll;Compliance;Talent Management
+HR Manager,HR Policies;Leadership;Employee Development;Conflict Resolution;Compensation;Compliance
+Civil Engineer,AutoCAD;Structural Design;Construction;Surveying;Project Planning;Safety Standards
+Mechanical Engineer,CAD;Thermodynamics;Manufacturing;SolidWorks;Maintenance;Design Analysis
+Electrical Engineer,Circuit Design;Electronics;Power Systems;Renewable Energy;Testing;Maintenance
+Aerospace Engineer,Aerodynamics;Propulsion;CAD;Simulation;Control Systems;Avionics
+Architect,AutoCAD;Revit;3D Modeling;Design;Construction;Sustainability;Project Management
+Doctor,Diagnosis;Patient Care;Surgery;Pharmacology;Medical Research;Clinical Skills
+Nurse,Patient Care;Medication Administration;Emergency Response;Medical Records;IV Therapy
+Pharmacist,Pharmacology;Medicines;Patient Counseling;Drug Development;Healthcare Regulations
+Psychologist,Counseling;Therapy;Research;Clinical Skills;Communication;Mental Health
+Lawyer,Legal Research;Contracts;Litigation;Negotiation;Compliance;Client Representation
+Judge,Legal Knowledge;Decision Making;Court Procedures;Law Interpretation;Ethics
+Journalist,Reporting;Writing;Editing;Research;Interviewing;News Writing;Storytelling
+Writer,Creative Writing;Editing;Proofreading;Research;Storytelling;SEO Writing
+Graphic Designer,Photoshop;Illustrator;Figma;UI/UX;Branding;Typography;Creativity
+Content Creator,Social Media;Video Editing;Photography;Copywriting;Storytelling
+Film Director,Screenwriting;Cinematography;Editing;Storytelling;Production;Leadership
+Actor,Acting;Improvisation;Voice Modulation;Stage Presence;Emotions;Public Speaking
+Musician,Music Theory;Composition;Instrument;Performance;Recording;Collaboration
+Customer Support Representative,Communication;CRM;Conflict Resolution;Customer Service;Problem Solving
+Entrepreneur,Leadership;Finance;Marketing;Networking;Innovation;Risk Management
+Government Officer,Policy Making;Administration;Leadership;Law;Communication;Management
+Politician,Public Speaking;Leadership;Networking;Policy Making;Negotiation;Communication
+Scientist,Research;Data Analysis;Experimentation;Publication;Critical Thinking;Innovation

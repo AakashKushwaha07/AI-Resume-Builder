@@ -1,0 +1,113 @@
+{
+  "Data Scientist": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Python", "Machine Learning", "Data Analysis", "SQL", "Statistics", "Pandas", "NumPy"]
+  },
+  "Java Developer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Java", "Spring", "SQL", "Git", "REST API", "Hibernate"]
+  },
+  "Web Developer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["HTML", "CSS", "JavaScript", "React", "Node.js", "Responsive Design"]
+  },
+  "Machine Learning Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Python", "Deep Learning", "TensorFlow", "Docker", "PyTorch", "NLP"]
+  },
+  "Database Administrator": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["SQL", "MongoDB", "Backup", "Performance Tuning", "Indexes", "Replication"]
+  },
+  "DevOps Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Certifications"],
+    "keywords": ["Docker", "Kubernetes", "CI/CD", "Linux", "AWS", "Terraform"]
+  },
+  "Software Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Python", "Java", "Git", "Problem Solving", "OOP", "Agile"]
+  },
+  "Frontend Developer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["React", "HTML", "CSS", "JavaScript", "UI/UX", "Redux"]
+  },
+  "Backend Developer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Node.js", "Express", "MongoDB", "API", "REST", "Authentication"]
+  },
+  "Project Manager": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Leadership", "Communication", "Teamwork", "Planning", "Agile", "Scrum"]
+  },
+
+  "--- NON-TECH FIELDS ---": {},
+
+  "Accountant": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Certifications"],
+    "keywords": ["Accounting", "Taxation", "Financial Reporting", "Excel", "Audit", "Budgeting", "Tally", "QuickBooks"]
+  },
+  "Financial Analyst": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Financial Modeling", "Excel", "Valuation", "Forecasting", "Investment Analysis", "Accounting", "Risk Management"]
+  },
+  "Human Resources Manager": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Recruitment", "Onboarding", "Employee Relations", "Payroll", "Compliance", "Performance Management", "HR Policies"]
+  },
+  "Marketing Specialist": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Digital Marketing", "SEO", "Social Media", "Google Analytics", "Brand Management", "Email Marketing", "Content Strategy"]
+  },
+  "Sales Executive": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Lead Generation", "Negotiation", "CRM", "Cold Calling", "Sales Strategy", "Customer Relationship Management"]
+  },
+  "Teacher": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Curriculum Development", "Classroom Management", "Lesson Planning", "Assessment", "Communication", "Subject Knowledge"]
+  },
+  "Nurse": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Certifications"],
+    "keywords": ["Patient Care", "Medical Records", "IV Therapy", "Medication Administration", "Clinical Skills", "Emergency Response"]
+  },
+  "Doctor": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Certifications"],
+    "keywords": ["Diagnosis", "Surgery", "Patient Care", "Medical Research", "Clinical Skills", "Pharmacology"]
+  },
+  "Lawyer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Certifications"],
+    "keywords": ["Litigation", "Legal Research", "Contracts", "Negotiation", "Client Representation", "Compliance", "Drafting"]
+  },
+  "Civil Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["AutoCAD", "Structural Design", "Construction", "Project Planning", "Surveying", "Materials Testing", "Safety Standards"]
+  },
+  "Mechanical Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["CAD", "Thermodynamics", "Manufacturing", "Design Analysis", "SolidWorks", "Fluid Mechanics", "Maintenance"]
+  },
+  "Electrical Engineer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Circuit Design", "Power Systems", "Electronics", "Testing", "Maintenance", "Renewable Energy"]
+  },
+  "Graphic Designer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Portfolio"],
+    "keywords": ["Adobe Photoshop", "Illustrator", "Figma", "UI/UX", "Typography", "Branding", "Creativity"]
+  },
+  "Content Writer": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Portfolio"],
+    "keywords": ["Copywriting", "SEO Writing", "Blogging", "Editing", "Storytelling", "Grammar", "Research"]
+  },
+  "Journalist": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Reporting", "Writing", "Editing", "Research", "Interviewing", "News Writing", "Storytelling"]
+  },
+  "Customer Support Representative": {
+    "sections": ["Summary", "Experience", "Education", "Skills"],
+    "keywords": ["Communication", "Problem Solving", "CRM Tools", "Conflict Resolution", "Customer Service", "Call Handling"]
+  },
+  "Business Analyst": {
+    "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
+    "keywords": ["Requirement Gathering", "UML", "SQL", "Data Analysis", "Stakeholder Communication", "Agile", "Documentation"]
+  }
+}

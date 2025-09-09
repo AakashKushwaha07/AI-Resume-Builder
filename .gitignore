@@ -1,0 +1,21 @@
+# Node / React
+node_modules/
+build/
+dist/
+
+# Python / Flask
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+.env
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
