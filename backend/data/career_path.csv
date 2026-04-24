@@ -52,3 +52,8 @@ Entrepreneur,Leadership;Finance;Marketing;Networking;Innovation;Risk Management
 Government Officer,Policy Making;Administration;Leadership;Law;Communication;Management
 Politician,Public Speaking;Leadership;Networking;Policy Making;Negotiation;Communication
 Scientist,Research;Data Analysis;Experimentation;Publication;Critical Thinking;Innovation
+Data Analyst,SQL;Excel;Data Analysis;Python;Power BI;Tableau;Statistics;Reporting
+Business Intelligence Analyst,Data Analysis;SQL;Power BI;Tableau;Reporting;Dashboards;Stakeholder Management
+Cloud Architect,AWS;Azure;GCP;Cloud Architecture;Kubernetes;Terraform;Networking;Security
+IT Support Specialist,Technical Support;Troubleshooting;Customer Service;Windows;Networking;Help Desk;Ticketing
+Security Engineer,Network Security;Encryption;Firewalls;Vulnerability Assessment;SIEM;Incident Response;Automation

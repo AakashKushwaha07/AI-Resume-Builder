@@ -6,6 +6,7 @@ const CareerPath = ({ resumeText }) => {
   const [score, setScore] = useState(null);
   const [matchedSkills, setMatchedSkills] = useState([]);
   const [method, setMethod] = useState('');
+  const [topRoles, setTopRoles] = useState([]);
 
   const handlePredict = async () => {
     try {
@@ -23,6 +24,7 @@ const CareerPath = ({ resumeText }) => {
       setScore(result.score || 0);
       setMatchedSkills(result.matched_skills || []);
       setMethod(result.method || '');
+      setTopRoles(result.top_roles || []);
     } catch (error) {
       console.error('Error predicting career path:', error);
     }
@@ -64,6 +66,22 @@ const CareerPath = ({ resumeText }) => {
           <p className="text-sm text-gray-500 italic mt-2">
             (Method used: {method})
           </p>
+
+          {topRoles.length > 1 && (
+            <div className="mt-4">
+              <h4 className="text-gray-800 font-semibold mb-2">Other good role fits</h4>
+              <div className="space-y-2">
+                {topRoles.slice(1, 4).map((role, index) => (
+                  <div key={index} className="rounded-xl border border-gray-200 p-3 bg-white">
+                    <div className="font-semibold text-gray-800">{role.career_path}</div>
+                    <div className="text-sm text-gray-600">
+                      Score: {role.final_score}% • Matched: {role.matched_skills.length} skills
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

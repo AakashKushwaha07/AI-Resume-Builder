@@ -3,22 +3,23 @@ from flask_cors import CORS
 
 from routes.auth import auth_bp
 from routes.resume_parser import parse_resume
-from routes.job_matching import match_job
 from routes.career_predictor import predict_career_path
 from routes.ats_simulator import ats_feedback
+from routes.resume_optimizer import optimizer_bp
 
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(optimizer_bp, url_prefix="/api/optimizer")
 
 # Endpoint to upload and parse resume
-@app.route('/api/upload', methods=['POST'])
+"""@app.route('/api/upload', methods=['POST'])
 def upload_resume():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -34,13 +35,41 @@ def upload_resume():
             'data': parsed_data
         })
     except Exception as e:
+        return jsonify({'error': str(e)}), 500"""
+        
+@app.route('/api/upload', methods=['POST'])
+def upload_resume():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    try:
+        # File → text extraction
+        from routes.resume_parser import parse_resume
+        parsed_data = parse_resume(file)   # contains "text"
+
+        resume_text = parsed_data.get("text")
+
+        # Text → evaluation (LINKING HERE)
+        from utils.resume_json_parser import parse_resume_to_json
+        evaluated_json = parse_resume_to_json(resume_text)
+
+        return jsonify({
+            'message': 'Resume uploaded and evaluated successfully',
+            'resume_json': evaluated_json
+        })
+
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 
-
 # Endpoint for job matching
-@app.route('/api/match', methods=['POST'])
+"""@app.route('/api/match', methods=['POST'])
 def job_matching():
     data = request.get_json()
     resume_text = data.get('resume_text')
@@ -51,7 +80,47 @@ def job_matching():
 
     result = match_job(resume_text, job_description)
     
-    return jsonify(result)
+    return jsonify(result)"""
+
+@app.route("/api/match", methods=["POST"])
+def job_matching():
+    data = request.get_json(silent=True) or {}
+
+    resume_text = (data.get("resume_text") or "").strip()
+    job_description = (data.get("job_description") or "").strip()
+
+    if not resume_text or not job_description:
+        return jsonify({
+            "error": "Missing resume text or job description",
+            "required_fields": ["resume_text", "job_description"]
+        }), 400
+
+    try:
+        # ---- Step 1: Resume JSON ----
+        from utils.resume_json_parser import parse_resume_to_json
+        resume_json = parse_resume_to_json(resume_text)
+
+        # ---- Step 2: JD JSON ----
+        from utils.jd_json_parser import parse_jd_to_json
+        jd_json = parse_jd_to_json(job_description)
+
+        # ---- Step 3: Evaluation ----
+        from models.evaluation_engine import evaluate_resume_against_jd
+        evaluation_report = evaluate_resume_against_jd(resume_json, jd_json)
+
+        return jsonify({
+            "resume_json": resume_json,             # keep for debugging (optional)
+            "jd_json": jd_json,                     # keep for debugging (optional)
+            "evaluation_report": evaluation_report  # frontend uses this
+        }), 200
+
+    except Exception as e:
+        # Gives frontend a clean error instead of silent 500
+        return jsonify({
+            "error": "Failed to process match request",
+            "message": str(e)
+        }), 500
+
 
 
 

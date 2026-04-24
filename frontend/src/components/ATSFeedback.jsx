@@ -24,30 +24,37 @@ const ATSFeedback = ({ resumeText }) => {
     fetchRoles();
   }, []);
 
-  const handleAtsFeedback = async () => {
+  const fetchAtsFeedback = async (selectedRole) => {
+    const role = selectedRole || jobRole;
+
     if (!resumeText) {
       setError("Please upload or paste a resume first.");
       return;
     }
+    if (!role) {
+      setError("Please select a job role to analyze.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    setAtsFeedback(null);
 
     try {
       const response = await fetch("http://localhost:5000/api/ats-feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume_data: resumeText, job_role: jobRole }),
+        body: JSON.stringify({ resume_data: resumeText, job_role: role }),
       });
 
       if (!response.ok) throw new Error("Server error. Please try again.");
 
       const result = await response.json();
-
       const payload = result && result.ats_feedback ? result.ats_feedback : result || {};
 
       const normalized = {
         ats_score: typeof payload.ats_score === "number" ? payload.ats_score : 0,
+        keyword_score: typeof payload.keyword_score === "number" ? payload.keyword_score : 0,
+        section_score: typeof payload.section_score === "number" ? payload.section_score : 0,
         feedback: Array.isArray(payload.feedback)
           ? payload.feedback
           : payload.feedback
@@ -59,15 +66,25 @@ const ATSFeedback = ({ resumeText }) => {
         missing_keywords: Array.isArray(payload.missing_keywords)
           ? payload.missing_keywords
           : [],
+        missing_sections: Array.isArray(payload.missing_sections)
+          ? payload.missing_sections
+          : [],
       };
 
       setAtsFeedback(normalized);
     } catch (err) {
       setError(err.message || "Something went wrong.");
+      setAtsFeedback(null);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (resumeText && jobRole) {
+      fetchAtsFeedback(jobRole);
+    }
+  }, [resumeText, jobRole]);
 
   return (
   <div className="flex justify-center items-center min-h-[70vh] bg-gradient-to-br from-gray-50 to-gray-100">
@@ -98,7 +115,7 @@ const ATSFeedback = ({ resumeText }) => {
       </div>
 
       <button
-        onClick={handleAtsFeedback}
+        onClick={() => fetchAtsFeedback(jobRole)}
         disabled={loading}
         className={`w-full py-2 px-4 font-semibold rounded-xl shadow-md transition duration-300 ${
           loading
@@ -106,7 +123,7 @@ const ATSFeedback = ({ resumeText }) => {
             : "bg-indigo-600 hover:bg-indigo-700 text-white"
         }`}
       >
-        {loading ? "Analyzing..." : "Get ATS Feedback"}
+        {loading ? "Analyzing..." : "Refresh role fit"}
       </button>
 
       {error && (
@@ -115,12 +132,26 @@ const ATSFeedback = ({ resumeText }) => {
 
       {atsFeedback && (
         <div className="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner border border-gray-200">
-          <p className="text-lg text-gray-800 mb-3">
-            <strong>ATS Score:</strong>{" "}
-            <span className="text-indigo-600 font-bold">
-              {atsFeedback.ats_score}%
-            </span>
-          </p>
+          <div className="grid gap-4 sm:grid-cols-3 mb-6">
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <p className="text-sm uppercase text-gray-500">Role fit</p>
+              <p className="mt-2 text-2xl font-bold text-indigo-600">
+                {atsFeedback.ats_score}%
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <p className="text-sm uppercase text-gray-500">Keyword coverage</p>
+              <p className="mt-2 text-xl font-semibold text-green-600">
+                {atsFeedback.keyword_score}%
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <p className="text-sm uppercase text-gray-500">Section coverage</p>
+              <p className="mt-2 text-xl font-semibold text-yellow-600">
+                {atsFeedback.section_score}%
+              </p>
+            </div>
+          </div>
 
           {atsFeedback.feedback.length > 0 && (
             <div className="mb-4">
@@ -172,6 +203,24 @@ const ATSFeedback = ({ resumeText }) => {
               <span className="text-gray-500">None</span>
             )}
           </div>
+
+          {atsFeedback.missing_sections && atsFeedback.missing_sections.length > 0 && (
+            <div className="mt-4">
+              <strong className="block text-gray-700 mb-2">
+                Missing Sections:
+              </strong>
+              <ul className="flex flex-wrap gap-2">
+                {atsFeedback.missing_sections.map((section, i) => (
+                  <li
+                    key={i}
+                    className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    {section}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
