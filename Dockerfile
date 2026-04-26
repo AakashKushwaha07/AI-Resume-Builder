@@ -16,7 +16,7 @@ COPY . .
 RUN pip install --upgrade pip
 
 # Install dependencies
-RUN pip install -r backend/requirements.txt
+RUN pip install -r requirements.txt
 
 # Start app
 CMD ["gunicorn", "backend.app:app", "--bind", "0.0.0.0:10000"]
