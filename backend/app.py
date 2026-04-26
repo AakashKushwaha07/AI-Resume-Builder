@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -7,8 +9,6 @@ from routes.resume_parser import parse_resume
 from routes.career_predictor import predict_career_path
 from routes.ats_simulator import ats_feedback
 from routes.resume_optimizer import optimizer_bp
-from dotenv import load_dotenv
-load_dotenv()
 
 
 app = Flask(__name__)
@@ -22,23 +22,7 @@ app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(optimizer_bp, url_prefix="/api/optimizer")
 
 # Endpoint to upload and parse resume
-"""@app.route('/api/upload', methods=['POST'])
-def upload_resume():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
 
-    try:
-        from routes.resume_parser import parse_resume  # Safe here
-        parsed_data = parse_resume(file)
-        return jsonify({
-            'message': 'Resume uploaded successfully',
-            'data': parsed_data
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500"""
         
 @app.route('/api/upload', methods=['POST'])
 def upload_resume():
@@ -70,20 +54,6 @@ def upload_resume():
         return jsonify({'error': str(e)}), 500
 
 
-
-# Endpoint for job matching
-"""@app.route('/api/match', methods=['POST'])
-def job_matching():
-    data = request.get_json()
-    resume_text = data.get('resume_text')
-    job_description = data.get('job_description')
-
-    if not resume_text or not job_description:
-        return jsonify({'error': 'Missing resume text or job description'}), 400
-
-    result = match_job(resume_text, job_description)
-    
-    return jsonify(result)"""
 
 @app.route("/api/match", methods=["POST"])
 def job_matching():
@@ -163,8 +133,11 @@ def get_job_roles():
 
 
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
     
 
 
