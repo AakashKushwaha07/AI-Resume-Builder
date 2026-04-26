@@ -22,11 +22,14 @@ RUN pip install --upgrade pip
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Download spaCy model
+RUN python -m spacy download en_core_web_sm
+
 # Copy backend application
 COPY backend/ .
 
 # Expose the port gunicorn runs on
 EXPOSE 10000
 
-# Start app with gunicorn
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--workers", "4"]]
+# Start app with gunicorn (use shell form for env var expansion)
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
