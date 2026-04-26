@@ -13,13 +13,7 @@ from routes.resume_optimizer import optimizer_bp
 
 app = Flask(__name__)
 
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "https://airesumebuilder-six-brown.vercel.app"
-        ]
-    }
-})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 
