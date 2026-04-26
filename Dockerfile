@@ -19,4 +19,4 @@ RUN pip install --upgrade pip
 RUN pip install -r backend/requirements.txt
 
 # Start app
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+CMD ["gunicorn", "backend.app:app", "--bind", "0.0.0.0:10000"]
