@@ -59,7 +59,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
         job_description_length: jobDescription.length,
       });
 
-      const response = await fetch(`${API_URL}/api/optimizer/start-session', {
+      const response = await fetch(`${API_URL}/api/optimizer/start-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
     ]);
 
     try {
-        response = await fetch(`${API_URL}/api/optimizer/chat-stream', {
+        const response = await fetch(`${API_URL}/api/optimizer/chat-stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
       });
 
       if (!response.ok || !response.body) {
-        response = await fetch(`${API_URL}/api/optimizer/chat', {
+        response = await fetch(`${API_URL}/api/optimizer/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

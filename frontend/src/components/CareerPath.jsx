@@ -12,7 +12,7 @@ const CareerPath = ({ resumeText }) => {
 
   const handlePredict = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/career-prediction', {
+      const response = await fetch(`${API_URL}/api/career-prediction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
