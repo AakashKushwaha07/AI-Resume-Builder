@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
@@ -26,7 +26,7 @@ const ATSFeedback = ({ resumeText }) => {
     fetchRoles();
   }, []);
 
-  const fetchAtsFeedback = async (selectedRole) => {
+  const fetchAtsFeedback = useCallback(async (selectedRole) => {
     const role = selectedRole || jobRole;
 
     if (!resumeText) {
@@ -80,13 +80,13 @@ const ATSFeedback = ({ resumeText }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resumeText, jobRole]);
 
   useEffect(() => {
     if (resumeText && jobRole) {
       fetchAtsFeedback(jobRole);
     }
-  }, [resumeText, jobRole]);
+  }, [resumeText, jobRole, fetchAtsFeedback]);
 
   return (
   <div className="flex justify-center items-center min-h-[70vh] bg-gradient-to-br from-gray-50 to-gray-100">

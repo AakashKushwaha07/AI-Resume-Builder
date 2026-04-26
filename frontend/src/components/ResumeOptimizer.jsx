@@ -202,10 +202,10 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
             }
 
             if (payload.chunk) {
-              assistantText += payload.chunk;
+              const currentChunk = payload.chunk;
               updateMessageById(assistantMessageId, (message) => ({
                 ...message,
-                content: assistantText,
+                content: (message.content || '') + currentChunk,
                 timestamp: new Date(),
                 streaming: true,
               }));
@@ -214,7 +214,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
             if (payload.done) {
               updateMessageById(assistantMessageId, (message) => ({
                 ...message,
-                content: assistantText || 'I understand. How else can I help?',
+                content: message.content || 'I understand. How else can I help?',
                 timestamp: new Date(),
                 streaming: false,
               }));

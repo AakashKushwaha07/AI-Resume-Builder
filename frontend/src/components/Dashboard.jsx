@@ -14,6 +14,7 @@ import {
   Bot,
   Sparkles,
   ArrowRight,
+  // eslint-disable-next-line no-unused-vars
   Target,
   Zap,
 } from "lucide-react";
@@ -424,7 +425,8 @@ export default function Dashboard({ user, onLogout }) {
     ats: state.ats,
   };
 
-  const sectionIcons = {
+  // eslint-disable-next-line no-unused-vars
+const sectionIcons = {
     resume: Upload,
     job: Briefcase,
     optimizer: Bot,
@@ -609,3 +611,4 @@ export default function Dashboard({ user, onLogout }) {
     </div>
   );
 }
+
