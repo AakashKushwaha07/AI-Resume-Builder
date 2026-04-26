@@ -135,7 +135,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
     ]);
 
     try {
-        const response = await fetch(`${API_URL}/api/optimizer/chat-stream`, {
+        let response = await fetch(`${API_URL}/api/optimizer/chat-stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
