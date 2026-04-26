@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import "../auth/Loginlg.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/reset-password", {
+      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, new_password: newPassword }),

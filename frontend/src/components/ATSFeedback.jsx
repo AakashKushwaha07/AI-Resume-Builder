@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const ATSFeedback = ({ resumeText }) => {
   const [atsFeedback, setAtsFeedback] = useState(null);
   const [jobRole, setJobRole] = useState("");
@@ -11,7 +13,7 @@ const ATSFeedback = ({ resumeText }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/job-roles");
+        const res = await fetch(`${API_URL}/api/job-roles`);
         const data = await res.json();
         if (data.roles) {
           setRoles(data.roles);
@@ -40,7 +42,7 @@ const ATSFeedback = ({ resumeText }) => {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:5000/api/ats-feedback", {
+      const response = await fetch(`${API_URL}/api/ats-feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resume_data: resumeText, job_role: role }),

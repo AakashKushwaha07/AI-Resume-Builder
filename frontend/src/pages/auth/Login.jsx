@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Loginlg.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 export default function Login({ setUserName }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState("");
@@ -21,7 +23,7 @@ export default function Login({ setUserName }) {
     }
     
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -49,7 +51,7 @@ export default function Login({ setUserName }) {
     }
     
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
+      const response = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: name, email, password }),
@@ -78,7 +80,7 @@ export default function Login({ setUserName }) {
     setForgotMessage("");
     
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/forgot-password", {
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),

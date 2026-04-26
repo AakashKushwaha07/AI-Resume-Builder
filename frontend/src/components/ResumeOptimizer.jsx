@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './ResumeOptimizer.css';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '' }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -57,7 +59,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
         job_description_length: jobDescription.length,
       });
 
-      const response = await fetch('http://localhost:5000/api/optimizer/start-session', {
+      const response = await fetch(`${API_URL}/api/optimizer/start-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +135,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
     ]);
 
     try {
-      let response = await fetch('http://localhost:5000/api/optimizer/chat-stream', {
+        response = await fetch(`${API_URL}/api/optimizer/chat-stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +147,7 @@ const ResumeOptimizer = ({ resumeData, jobDescription: initialJobDescription = '
       });
 
       if (!response.ok || !response.body) {
-        response = await fetch('http://localhost:5000/api/optimizer/chat', {
+        response = await fetch(`${API_URL}/api/optimizer/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

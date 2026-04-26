@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const JobMatcher = ({ resumeData, jobDescription: initialJobDescription = "", onJobMatchResults, onJobDescriptionChange }) => {
   const [jobDescription, setJobDescription] = useState(initialJobDescription);
   const [result, setResult] = useState(null);
@@ -21,7 +23,7 @@ const JobMatcher = ({ resumeData, jobDescription: initialJobDescription = "", on
       setError(null);
       setResult(null);
 
-      const response = await fetch("http://localhost:5000/api/match", {
+      const response = await fetch(`${API_URL}/api/match`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
