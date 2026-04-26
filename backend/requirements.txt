@@ -5,6 +5,7 @@ gunicorn==21.2.0
 Werkzeug==2.3.6
 Jinja2==3.1.6
 itsdangerous==2.2.0
+python-dotenv
 
 # API / HTTP
 requests==2.32.3
