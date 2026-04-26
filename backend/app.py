@@ -3,9 +3,12 @@ from flask_cors import CORS
 
 from routes.auth import auth_bp
 from routes.resume_parser import parse_resume
+#from routes.job_matching import match_job
 from routes.career_predictor import predict_career_path
 from routes.ats_simulator import ats_feedback
 from routes.resume_optimizer import optimizer_bp
+from dotenv import load_dotenv
+load_dotenv()
 
 
 app = Flask(__name__)
