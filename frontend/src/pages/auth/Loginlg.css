@@ -87,3 +87,81 @@ p {
 p:hover {
   color: #333;
 }
+
+/* Forgot Password Link */
+.forgot-link {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.modal-content input {
+  width: 90%;
+  margin: 10px 0;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background: #ccc !important;
+}
+
+.cancel-btn:hover {
+  background: #bbb !important;
+}
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 13px;
+  margin: 10px 0;
+}
+
+.success-msg {
+  color: #27ae60;
+  font-size: 13px;
+  margin: 10px 0;
+}

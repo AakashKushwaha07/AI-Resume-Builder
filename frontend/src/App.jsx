@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './index.css';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
+import ResetPassword from './pages/auth/ResetPassword';
 
 
 function App() {
@@ -56,13 +58,20 @@ function App() {
   }
 
   return (
-    <div className="App">
-      {isAuthenticated ? (
-        <Dashboard user={user} onLogout={handleLogout} />
-      ) : (
-        <LandingPage onLogin={handleLogin} />
-      )}
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/*" element={
+            isAuthenticated ? (
+              <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <LandingPage onLogin={handleLogin} />
+            )
+          } />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

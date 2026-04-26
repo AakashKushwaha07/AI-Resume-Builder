@@ -1,19 +1,36 @@
-# Node / React
+# =========================
+# Frontend (React)
+# =========================
 node_modules/
 build/
 dist/
 
-# Python / Flask
+# =========================
+# Backend (Flask / Python)
+# =========================
 venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Database files (if any local)
 *.db
 *.sqlite3
+
+# Environment variables (VERY IMPORTANT)
 .env
 
-# IDE / System
+# Flask specific
+instance/
+.webassets-cache
+
+# Logs
+*.log
+
+# =========================
+# IDE / OS files
+# =========================
 .vscode/
 .idea/
 .DS_Store

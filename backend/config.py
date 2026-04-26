@@ -7,7 +7,9 @@ MODEL_DIR = os.path.join(BASE_DIR, 'models')
 CAREER_MODEL_PATH = os.path.join(MODEL_DIR, 'career_model.pkl')
 VECTORIZER_PATH = os.path.join(MODEL_DIR, 'vectorizer.pkl')
 
-SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key_here")
+GMAIL_EMAIL = os.getenv("GMAIL_EMAIL")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # Database Config (MySQL)
 DB_CONFIG = {

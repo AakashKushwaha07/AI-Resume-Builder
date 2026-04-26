@@ -19,11 +19,13 @@ import {
 const LandingPage = ({ onLogin }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("login"); // login | signup
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
+  const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -38,6 +40,7 @@ const LandingPage = ({ onLogin }) => {
     setFormData({ name: "", email: "", password: "" });
     setMessage("");
     setLoading(false);
+    setIsForgotPassword(false);
   };
 
   const handleChange = (e) => {
@@ -84,6 +87,37 @@ const LandingPage = ({ onLogin }) => {
       setLoading(false);
     }
   };
+  const handleForgotPassword = async () => {
+  if (!resetEmail) {
+    setMessage("Please enter your email");
+    return;
+  }
+
+  setLoading(true);
+  setMessage("");
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/auth/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: resetEmail }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMessage(data.error || "Something went wrong");
+    } else {
+      setMessage("Reset link sent to your email");
+    }
+  } catch {
+    setMessage("Server error. Try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -96,7 +130,7 @@ const LandingPage = ({ onLogin }) => {
           </div>
           <button
             onClick={() => openModal("login")}
-            className="text-sm font-medium text-blue-600 hover:underline"
+            className="text-sm font-medium text-white-600 hover:underline"
           >
             Sign In
           </button>
@@ -123,7 +157,7 @@ const LandingPage = ({ onLogin }) => {
           <div className="mt-6 flex gap-4">
             <button
               onClick={() => openModal("signup")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              className="px-6 py-3 bg-white-600 text-white rounded-lg text-sm font-medium hover:bg-white-700"
             >
               Get Started
             </button>
@@ -260,7 +294,36 @@ const LandingPage = ({ onLogin }) => {
               {modalType === "signup" ? "Create Account" : "Sign In"}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {isForgotPassword ? (
+  <div className="space-y-4">
+    <Input
+      icon={<Mail />}
+      placeholder="Enter your email"
+      onChange={(e) => setResetEmail(e.target.value)}
+    />
+
+    {message && <p className="text-sm text-red-500">{message}</p>}
+
+    <button
+      onClick={handleForgotPassword}
+      disabled={loading}
+      className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm"
+    >
+      {loading ? "Sending..." : "Send Reset Link"}
+    </button>
+
+    <p
+      className="text-sm text-blue-600 cursor-pointer text-center"
+      onClick={() => {
+        setIsForgotPassword(false);
+        setMessage("");
+      }}
+    >
+      Back to Login
+    </p>
+  </div>
+) : (
+  <form onSubmit={handleSubmit} className="space-y-4">
               {modalType === "signup" && (
                 <Input
                   icon={<User />}
@@ -284,6 +347,17 @@ const LandingPage = ({ onLogin }) => {
                 placeholder="Password"
                 onChange={handleChange}
               />
+              {modalType === "login" && (
+  <p
+    className="text-sm text-blue-600 cursor-pointer text-right"
+    onClick={() => {
+      setIsForgotPassword(true);
+      setMessage("");
+    }}
+  >
+    Forgot Password?
+  </p>
+)}
 
               {message && <p className="text-sm text-red-500">{message}</p>}
 
@@ -298,6 +372,8 @@ const LandingPage = ({ onLogin }) => {
                   : "Sign In"}
               </button>
             </form>
+            
+)}
 
             <p className="text-sm text-center mt-4">
               {modalType === "signup" ? "Already have an account?" : "No account?"}{" "}

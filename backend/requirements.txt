@@ -56,6 +56,9 @@ pydantic==2.11.7
 pydantic_core==2.33.2
 Pygments==2.19.2
 PyJWT==2.10.1
+google-auth==2.40.0
+google-auth-oauthlib==1.2.1
+google-auth-httplib2==0.2.0
 PyMuPDF==1.22.5
 pyresparser==1.0.6
 pyrsistent==0.20.0
