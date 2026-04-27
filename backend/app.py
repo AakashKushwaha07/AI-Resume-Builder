@@ -13,9 +13,10 @@ from routes.resume_optimizer import optimizer_bp
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-
+CORS(app, resources={r"/api/*": {"origins": [
+    "https://airesumebuilder-six-brown.vercel.app",
+    "http://localhost:3000"
+]}})
 
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -35,22 +36,25 @@ def upload_resume():
         return jsonify({'error': 'No selected file'}), 400
 
     try:
-        # File → text extraction
+        import os
+
+        UPLOAD_FOLDER = "uploads"
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(file_path)
+
+        # ONLY parsing (no evaluation)
         from routes.resume_parser import parse_resume
-        parsed_data = parse_resume(file)   # contains "text"
-
-        resume_text = parsed_data.get("text")
-
-        # Text → evaluation (LINKING HERE)
-        from utils.resume_json_parser import parse_resume_to_json
-        evaluated_json = parse_resume_to_json(resume_text)
+        parsed_data = parse_resume(file_path)
 
         return jsonify({
-            'message': 'Resume uploaded and evaluated successfully',
-            'resume_json': evaluated_json
+            'message': 'Resume uploaded and parsed successfully',
+            'parsed_data': parsed_data
         })
 
     except Exception as e:
+        print("ERROR:", str(e))
         return jsonify({'error': str(e)}), 500
 
 
