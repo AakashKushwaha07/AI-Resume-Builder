@@ -32,4 +32,4 @@ COPY backend/ .
 EXPOSE 10000
 
 # Start app with gunicorn (use shell form for env var expansion)
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
