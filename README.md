@@ -1,4 +1,4 @@
-Your project is an AI Resume Builder and Career Intelligence platform. It helps users upload a resume, analyze it, compare it with job descriptions, get ATS-style feedback, receive career path suggestions, and chat with an AI-style resume optimizer for improvement guidance.
+This project is an AI Resume Builder and Career Intelligence platform. It helps users upload a resume, analyze it, compare it with job descriptions, get ATS-style feedback, receive career path suggestions, and chat with an AI-style resume optimizer for improvement guidance.
 
 At a high level, it is a full-stack web application built with:
 
