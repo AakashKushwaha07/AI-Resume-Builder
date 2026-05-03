@@ -12,6 +12,12 @@ auth_bp = Blueprint("auth", __name__)
 reset_tokens = {}
 
 
+def db_unavailable_response():
+    return jsonify({
+        "error": "Database connection failed. Please check DB_HOST, DB_PORT, and SSL settings."
+    }), 503
+
+
 # -----------------------------
 # Signup
 # -----------------------------
@@ -28,6 +34,9 @@ def signup():
     hashed_pw = generate_password_hash(password)
 
     conn = get_db_connection()
+    if conn is None:
+        return db_unavailable_response()
+
     cursor = conn.cursor(dictionary=True)
 
     # Check if email already exists
@@ -71,6 +80,9 @@ def login():
     password = data.get("password")
 
     conn = get_db_connection()
+    if conn is None:
+        return db_unavailable_response()
+
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
@@ -109,6 +121,9 @@ def forgot_password():
         return jsonify({"error": "Email is required"}), 400
 
     conn = get_db_connection()
+    if conn is None:
+        return db_unavailable_response()
+
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
@@ -196,6 +211,9 @@ def reset_password():
     hashed_pw = generate_password_hash(new_password)
 
     conn = get_db_connection()
+    if conn is None:
+        return db_unavailable_response()
+
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "UPDATE users SET password = %s WHERE email = %s",

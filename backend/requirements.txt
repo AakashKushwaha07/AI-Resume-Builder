@@ -70,6 +70,9 @@ google-auth-httplib2==0.2.0
 
 # OpenAI
 openai==1.99.9
+groq==0.31.0
+gTTS==2.5.4
+SpeechRecognition==3.14.3
 
 # Removed broken / problematic packages:
 # ❌ blis (removed - causes your error)

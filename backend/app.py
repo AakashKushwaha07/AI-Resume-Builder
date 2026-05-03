@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 from routes.auth import auth_bp
 from routes.resume_parser import parse_resume
@@ -27,6 +28,7 @@ app.register_blueprint(optimizer_bp, url_prefix="/api/optimizer")
         
 @app.route('/api/upload', methods=['POST'])
 def upload_resume():
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -36,25 +38,22 @@ def upload_resume():
         return jsonify({'error': 'No selected file'}), 400
 
     try:
-        import os
-
-        UPLOAD_FOLDER = "uploads"
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(file_path)
-
-        # ONLY parsing (no evaluation)
+        # File → text extraction
         from routes.resume_parser import parse_resume
-        parsed_data = parse_resume(file_path)
+        parsed_data = parse_resume(file)  # contains "text"
+
+        resume_text = parsed_data.get("text")
+
+        # Text → evaluation (LINKING HERE)
+        from utils.resume_json_parser import parse_resume_to_json
+        evaluated_json = parse_resume_to_json(resume_text)
 
         return jsonify({
-            'message': 'Resume uploaded and parsed successfully',
-            'parsed_data': parsed_data
+            'message': 'Resume uploaded and evaluated successfully',
+            'resume_json': evaluated_json
         })
 
     except Exception as e:
-        print("ERROR:", str(e))
         return jsonify({'error': str(e)}), 500
 
 
@@ -65,6 +64,8 @@ def job_matching():
 
     resume_text = (data.get("resume_text") or "").strip()
     job_description = (data.get("job_description") or "").strip()
+    temperature = float(data.get("temperature", 0.5))
+    max_tokens = int(data.get("max_tokens", 512))
 
     if not resume_text or not job_description:
         return jsonify({
@@ -73,30 +74,192 @@ def job_matching():
         }), 400
 
     try:
-        # ---- Step 1: Resume JSON ----
-        from utils.resume_json_parser import parse_resume_to_json
-        resume_json = parse_resume_to_json(resume_text)
-
-        # ---- Step 2: JD JSON ----
-        from utils.jd_json_parser import parse_jd_to_json
-        jd_json = parse_jd_to_json(job_description)
-
-        # ---- Step 3: Evaluation ----
-        from models.evaluation_engine import evaluate_resume_against_jd
-        evaluation_report = evaluate_resume_against_jd(resume_json, jd_json)
+        analysis = analyze_resume_with_groq(
+            resume_text=resume_text,
+            job_description=job_description,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
 
         return jsonify({
-            "resume_json": resume_json,             # keep for debugging (optional)
-            "jd_json": jd_json,                     # keep for debugging (optional)
-            "evaluation_report": evaluation_report  # frontend uses this
+            "analysis": analysis,
+            "evaluation_report": {
+                "analysis": analysis,
+                "source": "groq",
+            },
         }), 200
 
     except Exception as e:
-        # Gives frontend a clean error instead of silent 500
         return jsonify({
             "error": "Failed to process match request",
             "message": str(e)
         }), 500
+
+
+@app.route("/api/rephrase", methods=["POST"])
+def rephrase_resume_text():
+    data = request.get_json(silent=True) or {}
+
+    text = (data.get("text") or "").strip()
+    temperature = float(data.get("temperature", 0.5))
+    max_tokens = int(data.get("max_tokens", 512))
+
+    if not text:
+        return jsonify({
+            "error": "Missing text to rephrase",
+            "required_fields": ["text"]
+        }), 400
+
+    try:
+        rephrased_text = rephrase_text_with_groq(
+            text=text,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+        return jsonify({
+            "rephrased_text": rephrased_text,
+            "source": "groq",
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to rephrase text",
+            "message": str(e)
+        }), 500
+
+
+@app.route("/api/cover-letter", methods=["POST", "OPTIONS"])
+def cover_letter_generator():
+    if request.method == "OPTIONS":
+        return "", 204
+
+    data = request.get_json(silent=True) or {}
+
+    resume_text = (data.get("resume_text") or "").strip()
+    job_description = (data.get("job_description") or "").strip()
+    temperature = float(data.get("temperature", 0.5))
+    max_tokens = int(data.get("max_tokens", 512))
+
+    if not resume_text or not job_description:
+        return jsonify({
+            "error": "Missing resume text or job description",
+            "required_fields": ["resume_text", "job_description"]
+        }), 400
+
+    try:
+        cover_letter = generate_cover_letter_with_groq(
+            resume_text=resume_text,
+            job_description=job_description,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+        return jsonify({
+            "cover_letter": cover_letter,
+            "source": "groq",
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to generate cover letter",
+            "message": str(e)
+        }), 500
+
+
+def generate_groq_response(message: str, system_prompt: str, temperature: float = 0.5, max_tokens: int = 512):
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if not groq_api_key:
+        raise RuntimeError("GROQ_API_KEY is not configured in the backend environment.")
+
+    try:
+        from groq import Groq
+    except ImportError as exc:
+        raise RuntimeError("The groq package is not installed. Install backend requirements again.") from exc
+
+    client = Groq(api_key=groq_api_key)
+    conversation = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": message},
+    ]
+
+    response = client.chat.completions.create(
+        model=os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
+        messages=conversation,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        stream=False,
+    )
+
+    return response.choices[0].message.content
+
+
+def analyze_resume_with_groq(resume_text, job_description, temperature: float = 0.5, max_tokens: int = 512):
+    prompt = f"""
+Please analyze the following resume in the context of the job description provided.
+Strictly check every single line in the job description and analyze the resume for exact matches.
+Maintain high ATS standards and give scores only to the correct matches.
+Focus on missing hard skills and soft skills.
+
+Provide the following details:
+1. The match percentage of the resume to the job description.
+2. A list of accurate missing keywords.
+3. Final thoughts on the resume's overall match with the job description in 3 lines.
+4. Recommendations on how to add the missing keywords and improve the resume in 3-4 points with examples.
+
+Job Description:
+{job_description}
+
+Resume:
+{resume_text}
+"""
+    return generate_groq_response(
+        prompt,
+        "You are an expert ATS resume analyzer.",
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+
+def rephrase_text_with_groq(text, temperature: float = 0.5, max_tokens: int = 512):
+    prompt = f"""
+Please rephrase the following text according to ATS standards, including quantifiable measures and improvements where possible.
+Maintain precise and concise points which will pass ATS screening.
+
+Original Text:
+{text}
+"""
+    return generate_groq_response(
+        prompt,
+        "You are an expert in rephrasing content for ATS optimization.",
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+
+def generate_cover_letter_with_groq(resume_text, job_description, temperature: float = 0.5, max_tokens: int = 512):
+    prompt = f"""
+Generate a cover letter in this structure:
+
+1. Opening paragraph (role + company interest)
+2. Skills & experience matching job
+3. Achievements with metrics
+4. Closing paragraph with enthusiasm
+
+Keep it ATS-friendly and impactful.
+
+Resume:
+{resume_text}
+
+Job Description:
+{job_description}
+"""
+    return generate_groq_response(
+        prompt,
+        "You are an expert cover letter writer for ATS-friendly job applications.",
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
 
 
 
@@ -134,10 +297,6 @@ def get_job_roles():
 
     return jsonify({"roles": list(job_descriptions.keys())})
 
-
-
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

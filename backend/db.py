@@ -1,17 +1,20 @@
 import mysql.connector
 from config import DB_CONFIG
 
+
 def get_db_connection():
     try:
         conn = mysql.connector.connect(
-            host=DB_CONFIG['host'],
-            user=DB_CONFIG['user'],
-            password=DB_CONFIG['password'],
-            database=DB_CONFIG['database'],
-            port=DB_CONFIG['port']
+            host=DB_CONFIG["host"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            database=DB_CONFIG["database"],
+            port=DB_CONFIG["port"],
+            ssl_disabled=DB_CONFIG.get("ssl_disabled", True),
+            connection_timeout=10,
         )
-        print("✅ Connected to Railway MySQL")
+        print("Connected to Railway MySQL")
         return conn
     except Exception as e:
-        print("❌ Error while connecting to MySQL:", e)
+        print("Error while connecting to MySQL:", e)
         return None

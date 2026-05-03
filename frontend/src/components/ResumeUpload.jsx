@@ -9,19 +9,16 @@ const ResumeUpload = ({ onResumeData }) => {
 
   const fileInputRef = useRef(null);
 
-  // Handle file select
   const handleFile = (file) => {
     if (!file) return;
     setSelectedFile(file);
     setUploadMessage("");
   };
 
-  // Input change
   const handleFileChange = (e) => {
     handleFile(e.target.files[0]);
   };
 
-  // Drag & Drop handlers
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -37,7 +34,6 @@ const ResumeUpload = ({ onResumeData }) => {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  // Upload logic
   const handleUpload = async () => {
     if (!selectedFile) {
       setUploadMessage("Please select or drop a file.");
@@ -57,18 +53,15 @@ const ResumeUpload = ({ onResumeData }) => {
 
       if (response.ok) {
         setUploadMessage("Resume uploaded successfully.");
-        //onResumeData(result.data.text);
         onResumeData(result.resume_json.raw_text);
       } else {
         setUploadMessage(result.error || "Upload failed.");
       }
     } catch (error) {
-      console.error(error);
       setUploadMessage("Upload failed.");
     }
   };
 
-  // View resume
   const handleViewResume = () => {
     if (!selectedFile) return;
     const fileURL = URL.createObjectURL(selectedFile);
@@ -76,37 +69,44 @@ const ResumeUpload = ({ onResumeData }) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[60vh] bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md border border-gray-200">
-        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Upload Resume
-        </h2>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 text-white">
 
-        {/* Drag & Drop Area */}
+      {/* 🔥 Background Glow */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-indigo-500/20 blur-3xl rounded-full" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-cyan-400/20 blur-3xl rounded-full" />
+      </div>
+
+      {/* ✨ Main Content */}
+      <div className="text-center max-w-xl px-6">
+
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          Upload your resume
+        </h1>
+
+        <p className="mt-4 text-slate-400">
+          Drag & drop your file or browse to get AI-powered insights instantly.
+        </p>
+
+        {/* Upload Area */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current.click()}
-          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition
-            ${
-              isDragging
-                ? "border-indigo-600 bg-indigo-50"
-                : "border-gray-300 hover:border-indigo-400"
-            }`}
+          className={`mt-10 cursor-pointer rounded-2xl border border-white/10 backdrop-blur-xl p-10 transition-all
+          ${
+            isDragging
+              ? "border-indigo-400 bg-white/5 scale-105"
+              : "hover:border-indigo-400 hover:bg-white/5"
+          }`}
         >
-          <p className="text-gray-600 font-medium">
-            Drag & drop your resume here
+          <p className="text-lg font-medium">
+            {selectedFile ? selectedFile.name : "Drop your resume here"}
           </p>
-          <p className="text-sm text-gray-400 mt-1">
-            or click to browse (.pdf, .docx)
+          <p className="text-sm text-slate-400 mt-2">
+            PDF or DOCX • Max 5MB
           </p>
-
-          {selectedFile && (
-            <p className="mt-3 text-sm font-semibold text-indigo-600">
-              {selectedFile.name}
-            </p>
-          )}
 
           <input
             ref={fileInputRef}
@@ -117,34 +117,32 @@ const ResumeUpload = ({ onResumeData }) => {
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3 mt-6">
+        {/* Actions */}
+        <div className="flex justify-center gap-4 mt-8">
           <button
             onClick={handleUpload}
-            className="flex-1 py-2 px-4 bg-indigo-600 text-white font-semibold rounded-xl
-              hover:bg-indigo-700 transition"
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-semibold transition shadow-lg shadow-indigo-500/20"
           >
-            Upload
+            Upload Resume
           </button>
 
           {selectedFile && (
             <button
               onClick={handleViewResume}
-              className="flex-1 py-2 px-4 border border-indigo-600 text-indigo-600
-                font-semibold rounded-xl hover:bg-indigo-50 transition"
+              className="px-6 py-3 border border-white/20 rounded-xl hover:bg-white/10 transition"
             >
               View
             </button>
           )}
         </div>
 
-        {/* Status Message */}
+        {/* Message */}
         {uploadMessage && (
           <p
-            className={`mt-4 text-center font-medium ${
-              uploadMessage.includes("successfully")
-                ? "text-green-600"
-                : "text-red-500"
+            className={`mt-6 text-sm ${
+              uploadMessage.includes("success")
+                ? "text-green-400"
+                : "text-red-400"
             }`}
           >
             {uploadMessage}
