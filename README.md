@@ -1,216 +1,297 @@
-This project is an AI Resume Builder and Career Intelligence platform. It helps users upload a resume, analyze it, compare it with job descriptions, get ATS-style feedback, receive career path suggestions, and chat with an AI-style resume optimizer for improvement guidance.
+# AI Resume Builder
 
-At a high level, it is a full-stack web application built with:
+AI Resume Builder is a full-stack resume analysis and career guidance app. Users can sign up, upload a PDF or DOCX resume, extract resume information, compare it with job descriptions, generate ATS-style feedback, get career path suggestions, and chat with an AI resume optimizer.
 
-Frontend: React
-Backend: Flask / Python
-Database: MySQL
-AI/NLP: spaCy, scikit-learn, sentence-transformers, custom parsing logic
-Resume Parsing: PyMuPDF, pdfminer.six, python-docx
-Authentication: JWT-based login/signup system
-Project Overview
+## Tech Stack
 
-The main goal of this project is to help job seekers improve their resumes before applying for jobs. Instead of only creating a resume manually, the system analyzes the resume content, extracts important details, compares it with job requirements, and gives useful recommendations.
+- Frontend: React, React Router, Tailwind CSS, lucide-react
+- Backend: Python, Flask, Flask-CORS, Gunicorn
+- Database: MySQL
+- AI and NLP: Groq API, spaCy, sentence-transformers
+- Resume parsing: PyMuPDF, python-docx
+- Voice features: gTTS, SpeechRecognition
 
-A user can:
+## Project Structure
 
-Create an account and log in.
-Upload a resume.
-Extract resume text and convert it into structured JSON.
-Paste a job description.
-Check how well the resume matches that job.
-Get ATS feedback.
-Ask the AI optimizer how to improve the resume.
-Explore career path suggestions based on skills and experience.
-Frontend Description
+```text
+ai-resume-builder/
+  backend/
+    app.py
+    config.py
+    db.py
+    requirements.txt
+    runtime.txt
+    data/
+    routes/
+    utils/
+  frontend/
+    package.json
+    src/
+      components/
+      pages/
+```
 
-The frontend is built using React. The main dashboard is handled by:
+## Prerequisites
 
-frontend/src/components/Dashboard.jsx
-This dashboard provides navigation between the major features:
+Install these before running the project:
 
-Resume Upload
-Job Matcher
-AI Optimizer
-Career Path
-ATS Feedback
-The UI uses a sidebar layout with icons from lucide-react. Each section is displayed only when selected. The dashboard keeps shared state such as uploaded resume data, job match results, job description, optimizer results, career results, and ATS feedback.
+- Python 3.11
+- Node.js and npm
+- MySQL server or a hosted MySQL database
+- Git
+- A Groq API key for AI features
+- Optional: Gmail app password for forgot-password emails
 
-Important frontend components include:
+The backend is configured for Python `3.11.9` in `backend/runtime.txt`.
 
-ResumeUpload.jsx
-JobMatcher.jsx
-ResumeOptimizer.jsx
-CareerPath.jsx
-ATSFeedback.jsx
-Dashboard.jsx
-The frontend communicates with the backend using API calls. The API base URL is configured through:
+## 1. Clone the Repository
 
-frontend/.env
-Currently:
+```bash
+git clone https://github.com/AakashKushwaha07/AI-Resume-Builder
+cd ai-resume-builder
+```
 
+## 2. Backend Setup
+
+Open a terminal from the project root.
+
+```bash
+cd backend
+python -m venv venv
+```
+
+Activate the virtual environment.
+
+Windows PowerShell:
+
+```bash
+venv\Scripts\Activate.ps1
+```
+
+Windows Command Prompt:
+
+```bash
+venv\Scripts\activate.bat
+```
+
+macOS/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+Install backend dependencies:
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Note: the first install may take time because `sentence-transformers`, `spacy`, and their dependencies are large.
+
+## 3. Backend Environment Variables
+
+Create a file named `.env` inside the `backend` folder:
+
+```env
+SECRET_KEY=change_this_to_a_long_random_secret
+
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.1-8b-instant
+
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=ai_resume_builder
+DB_PORT=3306
+DB_SSL_DISABLED=true
+
+GMAIL_EMAIL=your_email@gmail.com
+GMAIL_APP_PASSWORD=your_gmail_app_password
+```
+
+Required variables:
+
+- `SECRET_KEY`: used for JWT authentication.
+- `GROQ_API_KEY`: required for job match, rephrase, cover letter, and optimizer chat features.
+- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`: required for signup/login.
+
+Optional variables:
+
+- `GROQ_MODEL`: defaults to `llama-3.1-8b-instant` if not set.
+- `GMAIL_EMAIL` and `GMAIL_APP_PASSWORD`: required only for forgot-password email sending.
+
+Never commit real `.env` files or API keys to Git.
+
+## 4. MySQL Database Setup
+
+Create the database:
+
+```sql
+CREATE DATABASE ai_resume_builder;
+USE ai_resume_builder;
+```
+
+Create the `users` table:
+
+```sql
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Make sure the database name and credentials match your `backend/.env` file.
+
+## 5. Run the Backend
+
+From the `backend` folder with the virtual environment activated:
+
+```bash
+python app.py
+```
+
+The backend should start at:
+
+```text
+http://127.0.0.1:5000
+```
+
+Important: run the backend from inside the `backend` folder. Some data files are loaded using relative paths such as `data/career_path.csv` and `data/job_descriptions.json`.
+
+The first backend startup may download the sentence-transformers model `paraphrase-MiniLM-L6-v2`. Keep internet enabled for the first run.
+
+## 6. Frontend Setup
+
+Open a second terminal from the project root.
+
+```bash
+cd frontend
+npm install
+```
+
+Create a file named `.env` inside the `frontend` folder:
+
+```env
 REACT_APP_API_URL=http://127.0.0.1:5000
-Backend Description
+DISABLE_ESLINT_PLUGIN=true
+```
 
-The backend is built using Flask and starts from:
+Start the frontend:
 
-backend/app.py
-This file creates the Flask app, enables CORS, registers routes, and exposes API endpoints.
+```bash
+npm start
+```
 
-Main backend features are split into route files:
+The frontend should open at:
 
-backend/routes/auth.py
-backend/routes/resume_parser.py
-backend/routes/resume_optimizer.py
-backend/routes/career_predictor.py
-backend/routes/ats_simulator.py
-The backend exposes APIs like:
+```text
+http://localhost:3000
+```
 
-/api/auth/signup
-/api/auth/login
-/api/auth/forgot-password
-/api/auth/reset-password
-/api/upload
-/api/match
-/api/optimizer/start-session
-/api/optimizer/chat
-/api/career-prediction
-/api/ats-feedback
-/api/job-roles
-Authentication System
+If it does not open automatically, visit that URL in your browser.
 
-The authentication system is handled in:
+## 7. Local Run Checklist
 
-backend/routes/auth.py
-It supports:
+To run the full project locally:
 
-Signup
-Login
-Forgot password
-Reset password
-JWT token generation
-Password hashing
-MySQL user storage
-Email reset link through Gmail SMTP
-Passwords are hashed using Werkzeug security helpers. Login returns a JWT token with user information.
+1. Start MySQL.
+2. Create the database and `users` table.
+3. Add `backend/.env`.
+4. Start the backend from the `backend` folder with `python app.py`.
+5. Add `frontend/.env`.
+6. Start the frontend from the `frontend` folder with `npm start`.
+7. Open `http://localhost:3000`.
+8. Sign up, log in, upload a resume, and test the dashboard features.
 
-Resume Upload and Parsing
+## Main Backend APIs
 
-The resume upload feature allows a user to upload a resume file. The backend extracts text from the file and then sends that text through a parser.
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+- `POST /api/upload`
+- `POST /api/match`
+- `POST /api/rephrase`
+- `POST /api/cover-letter`
+- `POST /api/career-prediction`
+- `POST /api/ats-feedback`
+- `GET /api/job-roles`
+- `POST /api/optimizer/chat`
+- `POST /api/optimizer/voice-to-text`
 
-The upload endpoint is in:
+## Build Frontend for Production
 
-backend/app.py
-The parser converts raw resume text into structured data such as:
+From the `frontend` folder:
 
-Education
-Experience years
-Technical skills
-Soft skills
-Projects
-Raw resume text
-This logic is mainly handled by:
+```bash
+npm run build
+```
 
-backend/utils/resume_json_parser.py
-It uses keyword matching and spaCy NLP to detect skills, education, projects, and experience.
+This creates a production build in:
 
-Job Matching
+```text
+frontend/build
+```
 
-The job matcher compares the uploaded resume with a pasted job description.
+## Render Backend Deployment Notes
 
-The job description is parsed by:
+For Render, use the backend requirements file:
 
-backend/utils/jd_json_parser.py
-The resume and job description are then evaluated by:
+```bash
+pip install -r backend/requirements.txt
+```
 
-backend/models/evaluation_engine.py
-The matching system checks:
+Example start command:
 
-Education fit
-Experience fit
-Mandatory skills
-Preferred skills
-Soft skills
-Project requirement
-Semantic similarity
-Final match score
-Pass/fail eligibility
-The response includes a score out of 100 and detailed information about matched and missing skills.
+```bash
+gunicorn --chdir backend app:app --bind 0.0.0.0:$PORT
+```
 
-AI Resume Optimizer
+Add the same backend environment variables in the Render dashboard. Do not upload `.env` files.
 
-The AI optimizer is a conversational assistant inside the app. It lets users ask questions like:
+## Troubleshooting
 
-How can I improve my resume?
-What are my weaknesses?
-Rewrite my summary.
-What skills should I learn next?
-How is my score generated?
-Frontend file:
+Backend cannot connect to MySQL:
 
-frontend/src/components/ResumeOptimizer.jsx
-Backend route:
+- Check `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME`.
+- Make sure the `users` table exists.
+- For local MySQL, `DB_SSL_DISABLED=true` is usually fine.
 
-backend/routes/resume_optimizer.py
-Main agent logic:
+Frontend cannot reach backend:
 
-backend/models/resume_optimizer.py
-This optimizer currently works mostly as a rule-based AI assistant. It stores sessions, remembers resume data, analyzes the resume, and generates contextual responses based on the user’s question.
+- Confirm the backend is running at `http://127.0.0.1:5000`.
+- Confirm `frontend/.env` contains `REACT_APP_API_URL=http://127.0.0.1:5000`.
+- Restart `npm start` after changing frontend `.env`.
 
-It can help with:
+spaCy model error:
 
-Professional summary improvement
-Experience bullet optimization
-Skills section improvement
-ATS keywords
-Weakness analysis
-Score explanation
-Resume rewrite planning
-DOCX/PDF optimized resume export
-Career Path Prediction
+- Reinstall backend requirements:
 
-The career path module analyzes the user’s resume data and tries to recommend possible career paths or growth directions. It uses skill and career data from backend datasets.
+```bash
+pip install -r requirements.txt
+```
 
-Route file:
+Sentence-transformers model download is slow:
 
-backend/routes/career_predictor.py
-This feature is useful for suggesting what roles a user may be suitable for based on current skills and experience.
+- Keep internet enabled during first backend startup.
+- After the model is cached locally, later startups should be faster.
 
-ATS Feedback
+Forgot password email fails:
 
-The ATS feedback module simulates how an Applicant Tracking System might evaluate the resume.
+- Use a Gmail app password, not your normal Gmail password.
+- Check `GMAIL_EMAIL` and `GMAIL_APP_PASSWORD`.
 
-Route file:
+Large dependency install:
 
-backend/routes/ats_simulator.py
-It gives suggestions to make the resume more ATS-friendly, such as improving keywords, skills, formatting, and job relevance.
+- This is expected because career prediction uses `sentence-transformers`, which installs ML libraries such as PyTorch.
 
-Database Usage
+## Security Notes
 
-The project uses MySQL for user authentication data. The database connection is handled through:
-
-backend/db.py
-Auth routes use this connection to store and retrieve users during signup, login, and password reset.
-
-Project Flow
-
-The normal user journey is:
-
-User signs up or logs in
-User uploads resume
-Backend extracts resume text
-Resume is converted into structured JSON
-User enters job description
-Backend parses job description
-System compares resume against job description
-User receives match score and feedback
-User opens AI Optimizer
-User chats with optimizer for improvement suggestions
-User checks ATS feedback or career path recommendations
-In Simple Words
-
-This project is not just a resume builder. It is more like a resume analysis and career guidance system. It helps users understand whether their resume is suitable for a particular job, what skills are missing, how ATS systems may read their resume, and how they can improve their resume before applying.
-
-A good project description for your resume or report could be:
-
-AI Resume Builder is a full-stack web application built with React and Fl
+- Keep `.env` files private.
+- Rotate any API keys or passwords that were accidentally committed or shared.
+- Use a strong `SECRET_KEY` in production.
+- Configure production CORS origins before deploying publicly.
