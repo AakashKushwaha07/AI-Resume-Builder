@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FileSignature, FileText, RefreshCw, SlidersHorizontal, Sparkles, Copy, CheckCheck } from "lucide-react";
+import { FileSignature, FileText, RefreshCw, SlidersHorizontal, Sparkles, Copy, CheckCheck, Trophy, UploadCloud, Download } from "lucide-react";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
@@ -15,6 +15,12 @@ const JobMatcher = ({
   const [textToRephrase, setTextToRephrase] = useState("");
   const [rephrasedText, setRephrasedText] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
+  const [rankInputMode, setRankInputMode] = useState("dataset");
+  const [candidateFile, setCandidateFile] = useState(null);
+  const [resumeFiles, setResumeFiles] = useState([]);
+  const [candidateRankings, setCandidateRankings] = useState([]);
+  const [rankingCsv, setRankingCsv] = useState("");
+  const [topN, setTopN] = useState(100);
   const [temperature, setTemperature] = useState(0.5);
   const [maxTokens, setMaxTokens] = useState(512);
   const [showParameters, setShowParameters] = useState(false);
@@ -110,6 +116,61 @@ const JobMatcher = ({
     }
   };
 
+  const handleRankCandidates = async () => {
+    if (!jobDescription.trim()) {
+      setError("Paste the job description before ranking.");
+      return;
+    }
+    if (rankInputMode === "dataset" && !candidateFile) {
+      setError("Upload a candidate JSON/JSONL file.");
+      return;
+    }
+    if (rankInputMode === "resumes" && resumeFiles.length === 0) {
+      setError("Upload at least one resume PDF or DOCX.");
+      return;
+    }
+    try {
+      setLoadingAction("rank-candidates");
+      setError(null);
+      setCandidateRankings([]);
+      setRankingCsv("");
+
+      const formData = new FormData();
+      formData.append("job_description", jobDescription);
+      formData.append("top_n", String(topN));
+      const endpoint = rankInputMode === "resumes" ? "/api/rank-resumes" : "/api/rank-candidates";
+
+      if (rankInputMode === "resumes") {
+        resumeFiles.forEach((file) => formData.append("resumes", file));
+      } else {
+        formData.append("candidates", candidateFile);
+      }
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error(await readError(response, "Ranking failed."));
+      const data = await response.json();
+      setCandidateRankings(data?.rankings || []);
+      setRankingCsv(data?.csv || "");
+    } catch (err) {
+      setError(err?.message || "Ranking failed.");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const addResumeFiles = (files) => {
+    const nextFiles = Array.from(files || []).filter((file) => /\.(pdf|docx)$/i.test(file.name));
+    if (!nextFiles.length) return;
+    setResumeFiles((current) => [...current, ...nextFiles]);
+  };
+
+  const removeResumeFile = (indexToRemove) => {
+    setResumeFiles((current) => current.filter((_, index) => index !== indexToRemove));
+  };
+
   const handleJobDescriptionChange = (value) => {
     setJobDescription(value);
     onJobDescriptionChange?.(value);
@@ -118,6 +179,7 @@ const JobMatcher = ({
   const getOutputContent = () => {
     if (activeTab === "analyzer") return { content: analysis, title: "ATS Analysis", empty: "Run an analysis to see match percentage, missing keywords, final thoughts, and recommendations." };
     if (activeTab === "rephraser") return { content: rephrasedText, title: "Rephrased Content", empty: "Rephrased ATS-friendly content will appear here." };
+    if (activeTab === "ranker") return { content: rankingCsv, title: "Candidate Ranking", empty: "Upload candidates or resumes and run the ranker to preview the best matches and export a CSV." };
     return { content: coverLetter, title: "Cover Letter", empty: "Generate a tailored ATS-friendly cover letter from your resume and job description." };
   };
 
@@ -129,13 +191,26 @@ const JobMatcher = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadRankingCsv = () => {
+    if (!rankingCsv) return;
+    const blob = new Blob([rankingCsv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = rankInputMode === "resumes" ? "resume_ranking.csv" : "candidate_ranking_submission.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const isAnalyzing = loadingAction === "analyze";
   const isRephrasing = loadingAction === "rephrase";
   const isGeneratingCoverLetter = loadingAction === "cover-letter";
+  const isRankingCandidates = loadingAction === "rank-candidates";
   const isLoading = !!loadingAction;
 
   const tabs = [
     { id: "analyzer", label: "Resume Analyzer", icon: FileText },
+    { id: "ranker", label: "Candidate Ranker", icon: Trophy },
     { id: "rephraser", label: "Content Rephraser", icon: Sparkles },
     { id: "cover-letter", label: "Cover Letter", icon: FileSignature },
   ];
@@ -231,6 +306,82 @@ const JobMatcher = ({
             )}
           </div>
 
+          {activeTab === "ranker" && (
+            <div style={styles.rankerPanel}>
+              <div style={styles.modeSwitch}>
+                <button
+                  type="button"
+                  onClick={() => setRankInputMode("dataset")}
+                  style={{ ...styles.modeBtn, ...(rankInputMode === "dataset" ? styles.modeBtnActive : {}) }}
+                >
+                  JSON Dataset
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRankInputMode("resumes")}
+                  style={{ ...styles.modeBtn, ...(rankInputMode === "resumes" ? styles.modeBtnActive : {}) }}
+                >
+                  Resume PDFs
+                </button>
+              </div>
+
+              <div style={styles.rankerControls}>
+                {rankInputMode === "dataset" ? (
+                  <label style={styles.fileDrop}>
+                    <UploadCloud size={22} />
+                    <span style={styles.fileDropText}>
+                      {candidateFile ? candidateFile.name : "Upload sample_candidates.json or candidates.jsonl"}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".json,.jsonl,application/json"
+                      onChange={(e) => setCandidateFile(e.target.files?.[0] || null)}
+                      style={styles.hiddenFile}
+                    />
+                  </label>
+                ) : (
+                  <label style={styles.fileDrop}>
+                    <UploadCloud size={22} />
+                    <span style={styles.fileDropText}>
+                      Add resume PDFs/DOCX files ({resumeFiles.length} selected)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.docx"
+                      multiple
+                      onChange={(e) => addResumeFiles(e.target.files)}
+                      style={styles.hiddenFile}
+                    />
+                  </label>
+                )}
+                <label style={styles.topNControl}>
+                  <span>Top candidates</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={topN}
+                    onChange={(e) => setTopN(Math.max(1, Math.min(100, Number(e.target.value) || 100)))}
+                    style={styles.topNInput}
+                  />
+                </label>
+              </div>
+
+              {rankInputMode === "resumes" && resumeFiles.length > 0 && (
+                <div style={styles.resumeFileList}>
+                  {resumeFiles.map((file, index) => (
+                    <div key={`${file.name}-${index}`} style={styles.resumeFileItem}>
+                      <span style={styles.resumeFileName}>{file.name}</span>
+                      <button type="button" onClick={() => removeResumeFile(index)} style={styles.removeFileBtn}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === "rephraser" ? (
             <textarea
               value={textToRephrase}
@@ -254,6 +405,7 @@ const JobMatcher = ({
             type="button"
             onClick={
               activeTab === "analyzer" ? handleAnalyze
+              : activeTab === "ranker" ? handleRankCandidates
               : activeTab === "rephraser" ? handleRephrase
               : handleCoverLetter
             }
@@ -261,10 +413,12 @@ const JobMatcher = ({
             style={{ ...styles.actionBtn, ...(isLoading ? styles.actionBtnDisabled : {}) }}
           >
             <RefreshCw size={16} style={isLoading ? styles.spinIcon : {}} />
-            {isAnalyzing ? "Analyzing…"
-              : isRephrasing ? "Rephrasing…"
-              : isGeneratingCoverLetter ? "Generating…"
+            {isAnalyzing ? "Analyzing..."
+              : isRankingCandidates ? "Ranking candidates..."
+              : isRephrasing ? "Rephrasing..."
+              : isGeneratingCoverLetter ? "Generating..."
               : activeTab === "analyzer" ? "Analyze Resume"
+              : activeTab === "ranker" ? (rankInputMode === "resumes" ? "Rank Resumes" : "Rank Candidates")
               : activeTab === "rephraser" ? "Rephrase Content"
               : "Generate Cover Letter"}
           </button>
@@ -282,15 +436,44 @@ const JobMatcher = ({
         <div style={styles.outputCard}>
           <div style={styles.outputHeader}>
             <span style={styles.outputTitle}>{outputTitle}</span>
-            {outputContent && (
+            {outputContent && activeTab !== "ranker" && (
               <button type="button" onClick={handleCopy} style={styles.copyBtn}>
                 {copied ? <><CheckCheck size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+              </button>
+            )}
+            {rankingCsv && activeTab === "ranker" && (
+              <button type="button" onClick={downloadRankingCsv} style={styles.copyBtn}>
+                <Download size={14} /> CSV
               </button>
             )}
           </div>
 
           <div style={styles.outputBody}>
-            {outputContent ? (
+            {activeTab === "ranker" && candidateRankings.length > 0 ? (
+              <div style={styles.rankingTableWrap}>
+                <table style={styles.rankingTable}>
+                  <thead>
+                    <tr>
+                      <th style={styles.rankTh}>Rank</th>
+                      <th style={styles.rankTh}>{rankInputMode === "resumes" ? "Resume" : "Candidate"}</th>
+                      <th style={styles.rankTh}>Score</th>
+                      <th style={styles.rankTh}>Reasoning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {candidateRankings.slice(0, 20).map((row) => (
+                      <tr key={row.candidate_id}>
+                        <td style={styles.rankTd}>{row.rank}</td>
+                        <td style={styles.rankTdStrong}>{rankInputMode === "resumes" ? (row.filename || row.candidate_id) : row.candidate_id}</td>
+                        <td style={styles.rankTd}>{Number(row.score).toFixed(4)}</td>
+                        <td style={styles.rankTd}>{row.reasoning}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p style={styles.tableHint}>Showing top {Math.min(candidateRankings.length, 20)} of {candidateRankings.length}. Download CSV for the full ranked submission.</p>
+              </div>
+            ) : outputContent ? (
               <pre style={styles.outputText}>{outputContent}</pre>
             ) : isLoading ? (
               <div style={styles.loadingState}>
@@ -304,7 +487,7 @@ const JobMatcher = ({
             ) : (
               <div style={styles.emptyState}>
                 <div style={styles.emptyIcon}>
-                  {activeTab === "analyzer" ? <FileText size={32} /> : activeTab === "rephraser" ? <Sparkles size={32} /> : <FileSignature size={32} />}
+                  {activeTab === "analyzer" ? <FileText size={32} /> : activeTab === "ranker" ? <Trophy size={32} /> : activeTab === "rephraser" ? <Sparkles size={32} /> : <FileSignature size={32} />}
                 </div>
                 <p style={styles.emptyText}>{emptyText}</p>
               </div>
@@ -520,6 +703,120 @@ const styles = {
     fontSize: "11px",
     color: "#4a4a6a",
   },
+  rankerPanel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    marginBottom: "16px",
+  },
+  modeSwitch: {
+    display: "inline-flex",
+    alignSelf: "flex-start",
+    border: "1px solid #1e1e30",
+    borderRadius: "10px",
+    overflow: "hidden",
+    background: "#0d0d18",
+  },
+  modeBtn: {
+    border: "none",
+    background: "transparent",
+    color: "#7474a0",
+    padding: "9px 14px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+  },
+  modeBtnActive: {
+    background: "rgba(99,102,241,0.16)",
+    color: "#a5b4fc",
+  },
+  rankerControls: {
+    display: "grid",
+    gridTemplateColumns: "1fr 150px",
+    gap: "12px",
+  },
+  fileDrop: {
+    minHeight: "58px",
+    border: "1px dashed #2d2d4a",
+    borderRadius: "12px",
+    background: "#0d0d18",
+    color: "#9090b8",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "12px 16px",
+    cursor: "pointer",
+    overflow: "hidden",
+  },
+  fileDropText: {
+    fontSize: "13px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  hiddenFile: {
+    display: "none",
+  },
+  topNControl: {
+    minHeight: "58px",
+    border: "1px solid #1e1e30",
+    borderRadius: "12px",
+    background: "#0d0d18",
+    color: "#7474a0",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    gap: "5px",
+    padding: "10px 12px",
+    fontSize: "11px",
+  },
+  topNInput: {
+    width: "100%",
+    border: "1px solid #2d2d3d",
+    borderRadius: "8px",
+    background: "#111122",
+    color: "#c4c4e0",
+    padding: "6px 8px",
+    fontSize: "13px",
+  },
+  resumeFileList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    maxHeight: "180px",
+    overflowY: "auto",
+    border: "1px solid #1e1e30",
+    borderRadius: "12px",
+    background: "#0d0d18",
+    padding: "10px",
+  },
+  resumeFileItem: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    padding: "8px 10px",
+    borderRadius: "8px",
+    background: "#111122",
+  },
+  resumeFileName: {
+    color: "#c4c4e0",
+    fontSize: "12px",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+  },
+  removeFileBtn: {
+    border: "1px solid rgba(239,68,68,0.25)",
+    background: "rgba(239,68,68,0.08)",
+    color: "#f87171",
+    borderRadius: "7px",
+    padding: "5px 8px",
+    fontSize: "11px",
+    cursor: "pointer",
+    flexShrink: 0,
+  },
 
   // Input Card
   card: {
@@ -662,6 +959,45 @@ const styles = {
     lineHeight: "1.8",
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
+  },
+  rankingTableWrap: {
+    width: "100%",
+    overflowX: "auto",
+  },
+  rankingTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+    minWidth: "680px",
+  },
+  rankTh: {
+    textAlign: "left",
+    padding: "10px 12px",
+    borderBottom: "1px solid #1e1e30",
+    color: "#818cf8",
+    fontSize: "12px",
+    fontWeight: "700",
+  },
+  rankTd: {
+    padding: "12px",
+    borderBottom: "1px solid #1a1a2e",
+    color: "#b0b0d0",
+    fontSize: "13px",
+    lineHeight: 1.5,
+    verticalAlign: "top",
+  },
+  rankTdStrong: {
+    padding: "12px",
+    borderBottom: "1px solid #1a1a2e",
+    color: "#e2e2f0",
+    fontSize: "13px",
+    fontWeight: "700",
+    verticalAlign: "top",
+    whiteSpace: "nowrap",
+  },
+  tableHint: {
+    marginTop: "14px",
+    color: "#4a4a6a",
+    fontSize: "12px",
   },
   emptyState: {
     flex: 1,

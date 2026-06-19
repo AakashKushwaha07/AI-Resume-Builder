@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
 import os
 
 from routes.auth import auth_bp
@@ -10,13 +11,15 @@ from routes.resume_parser import parse_resume
 from routes.career_predictor import predict_career_path
 from routes.ats_simulator import ats_feedback
 from routes.resume_optimizer import optimizer_bp
+from utils.candidate_ranker import rank_candidates_from_file, rank_resumes, rankings_to_csv, resume_rankings_to_csv
 
 
 app = Flask(__name__)
 
 CORS(app, resources={r"/api/*": {"origins": [
     "https://airesumebuilder-six-brown.vercel.app",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]}})
 
 
@@ -43,6 +46,10 @@ def upload_resume():
         parsed_data = parse_resume(file)  # contains "text"
 
         resume_text = parsed_data.get("text")
+        if not resume_text:
+            return jsonify({
+                "error": "No readable text found in this resume. Please upload a text-based PDF or DOCX file."
+            }), 422
 
         # Text → evaluation (LINKING HERE)
         from utils.resume_json_parser import parse_resume_to_json
@@ -164,6 +171,125 @@ def cover_letter_generator():
         return jsonify({
             "error": "Failed to generate cover letter",
             "message": str(e)
+        }), 500
+
+
+@app.route("/api/rank-candidates", methods=["POST", "OPTIONS"])
+def rank_candidates():
+    if request.method == "OPTIONS":
+        return "", 204
+
+    candidate_file = request.files.get("candidates")
+    job_description = ""
+    top_n = 100
+
+    if request.form:
+        job_description = (request.form.get("job_description") or "").strip()
+        top_n = int(request.form.get("top_n") or 100)
+
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        job_description = (data.get("job_description") or "").strip()
+        top_n = int(data.get("top_n") or 100)
+        candidates = data.get("candidates")
+        if candidates:
+            from io import StringIO
+            candidate_file = StringIO(json.dumps(candidates))
+
+    if candidate_file is None:
+        return jsonify({
+            "error": "Missing candidates file",
+            "required_fields": ["candidates"]
+        }), 400
+
+    try:
+        rankings = rank_candidates_from_file(candidate_file, job_description=job_description, top_n=top_n)
+        csv_text = rankings_to_csv(rankings)
+
+        return jsonify({
+            "rankings": rankings,
+            "csv": csv_text,
+            "count": len(rankings),
+            "source": "deterministic_candidate_ranker",
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to rank candidates",
+            "message": str(e)
+        }), 500
+
+
+@app.route("/api/rank-resumes", methods=["POST", "OPTIONS"])
+def rank_resume_files():
+    if request.method == "OPTIONS":
+        return "", 204
+
+    resume_files = request.files.getlist("resumes")
+    job_description = (request.form.get("job_description") or "").strip()
+    top_n = int(request.form.get("top_n") or 100)
+
+    if not resume_files:
+        return jsonify({
+            "error": "Missing resume files",
+            "required_fields": ["resumes", "job_description"]
+        }), 400
+
+    if not job_description:
+        return jsonify({
+            "error": "Missing job description",
+            "required_fields": ["job_description"]
+        }), 400
+
+    parsed_resumes = []
+    skipped = []
+
+    for index, file in enumerate(resume_files, start=1):
+        filename = file.filename or f"resume_{index}"
+        try:
+            parsed = parse_resume(file)
+            text = (parsed.get("text") or "").strip()
+            if not text:
+                skipped.append({
+                    "filename": filename,
+                    "reason": "No readable text found"
+                })
+                continue
+
+            parsed_resumes.append({
+                "resume_id": f"RESUME_{index:04d}",
+                "filename": filename,
+                "text": text,
+            })
+        except Exception as exc:
+            skipped.append({
+                "filename": filename,
+                "reason": str(exc)
+            })
+
+    if not parsed_resumes:
+        return jsonify({
+            "error": "No readable resumes found",
+            "skipped": skipped
+        }), 422
+
+    try:
+        rankings = rank_resumes(parsed_resumes, job_description=job_description, top_n=top_n)
+        csv_text = resume_rankings_to_csv(rankings)
+
+        return jsonify({
+            "rankings": rankings,
+            "csv": csv_text,
+            "count": len(rankings),
+            "skipped": skipped,
+            "source": "deterministic_resume_ranker",
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to rank resumes",
+            "message": str(e),
+            "skipped": skipped,
         }), 500
 
 

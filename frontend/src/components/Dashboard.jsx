@@ -510,7 +510,7 @@ export default function Dashboard({ user, onLogout }) {
                 © {new Date().getFullYear()} AI Resume Builder. All rights reserved.
               </span>
               <span className="db-footer-tagline">
-                Built with <span style={{ color: "#818cf8" }}>♥</span> using React & AI
+                Built with <span style={{ color: "#818cf8" }}>AAKASH</span> using AI
               </span>
             </div>
           </div>

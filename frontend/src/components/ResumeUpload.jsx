@@ -6,6 +6,7 @@ const ResumeUpload = ({ onResumeData }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -44,21 +45,30 @@ const ResumeUpload = ({ onResumeData }) => {
     formData.append("file", selectedFile);
 
     try {
+      setIsUploading(true);
+      setUploadMessage("");
       const response = await fetch(`${API_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
 
       if (response.ok) {
+        const rawText = result?.resume_json?.raw_text;
+        if (!rawText) {
+          setUploadMessage("Resume uploaded, but no readable text was found.");
+          return;
+        }
         setUploadMessage("Resume uploaded successfully.");
-        onResumeData(result.resume_json.raw_text);
+        onResumeData(rawText);
       } else {
-        setUploadMessage(result.error || "Upload failed.");
+        setUploadMessage(result.message || result.error || "Upload failed.");
       }
     } catch (error) {
-      setUploadMessage("Upload failed.");
+      setUploadMessage(`Upload failed: ${error?.message || "Could not reach backend."}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -121,9 +131,10 @@ const ResumeUpload = ({ onResumeData }) => {
         <div className="flex justify-center gap-4 mt-8">
           <button
             onClick={handleUpload}
+            disabled={isUploading}
             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-semibold transition shadow-lg shadow-indigo-500/20"
           >
-            Upload Resume
+            {isUploading ? "Uploading..." : "Upload Resume"}
           </button>
 
           {selectedFile && (
